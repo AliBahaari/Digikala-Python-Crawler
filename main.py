@@ -14,7 +14,7 @@ class storeCategoryCrawl:
         if (request.json()["status"] != 200):
             self.status = 400
 
-            return "Error"
+            return "Category Error"
         else:
             self.data = request.json()["data"]
             self.status = 200
@@ -39,9 +39,12 @@ class storeCategoryCrawl:
             request = requests.get(
                 "https://api.digikala.com/v1/product/" + str(productId) + "/comments/?page=" + str(commentsPagesCount))
 
-            if "comments" in request.json()["data"]:
-                for j in request.json()["data"]["comments"]:
-                    print(j["body"])
+            if (request.json()["status"] != 200):
+                return "Comments Error"
+            else:
+                if "comments" in request.json()["data"]:
+                    for j in request.json()["data"]["comments"]:
+                        print(j["body"])
 
     def getDetails(self, productId):
         request = requests.get(
@@ -71,4 +74,4 @@ for i in range(1):
     storeCategoryData = storeCategoryCrawl(
         'CATEGORY_LINK' + str(i))
 
-    print(storeCategoryData.extractProductDetails())
+    storeCategoryData.extractProductDetails()
