@@ -44,12 +44,16 @@ class storeCategoryCrawl:
             else:
                 if "comments" in request.json()["data"]:
                     for j in request.json()["data"]["comments"]:
+                        print(
+                            'C----------------------------------------')
                         print(j["body"])
 
     def getDetails(self, productId):
         request = requests.get(
             "https://api.digikala.com/v1/product/" + str(productId) + "/")
 
+        print(
+            'D----------------------------------------')
         print(request.json()["data"]["product"]
               ["review"]["description"])
 
@@ -59,11 +63,13 @@ class storeCategoryCrawl:
         if (len(self.productsUrls) > 0 and self.status == 200):
 
             for i in self.productsUrls:
-                print(str(i["id"]))
+                print(
+                    'P----------------------------------------')
+                print(str(i["id"]) + " - " + str(i["title"]))
 
                 # -> Product Details
 
-                # self.getDetails(i["id"])
+                self.getDetails(i["id"])
 
                 # -> Comments
 
