@@ -1,5 +1,4 @@
-# -> Change Pages Dynamically
-# -> Get All Categories Links Dynamically
+# -> Change Comment Pages Dynamically
 
 import requests
 
@@ -8,17 +7,22 @@ class storeCategoryCrawl:
     def __init__(self, url):
         self.url = url
 
-    def extract(self):
+    def checkCategory(self):
         request = requests.get(
             self.url)
 
-        self.data = request.json()["data"]
-        self.status = request.json()["status"]
+        if (request.json()["status"] != 200):
+            self.status = 400
 
-        return [self.data, self.status]
+            return "Error"
+        else:
+            self.data = request.json()["data"]
+            self.status = 200
+
+            return [self.data, self.status]
 
     def extractProducts(self):
-        self.extract()
+        self.checkCategory()
 
         productsUrls = []
         if (self.status == 200):
@@ -27,12 +31,13 @@ class storeCategoryCrawl:
                     {"id": i["id"], "title": i["title_fa"], "url": i["url"]["uri"]})
 
         self.productsUrls = productsUrls
+
         return productsUrls
 
     def extractProductDetails(self):
         self.extractProducts()
 
-        if (len(self.productsUrls) > 0):
+        if (len(self.productsUrls) > 0 and self.status == 200):
             for i in self.productsUrls:
                 print(str(i["id"]))
 
@@ -54,7 +59,8 @@ class storeCategoryCrawl:
                         print(j["body"])
 
 
-storeCategoryData = storeCategoryCrawl(
-    'CATEGORY_LINK')
+for i in range(10):
+    storeCategoryData = storeCategoryCrawl(
+        'CATEGORY_LINK' + str(i))
 
-storeCategoryData.extractProductDetails()
+    print(storeCategoryData.checkCategory())
