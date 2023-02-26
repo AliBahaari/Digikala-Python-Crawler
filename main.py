@@ -1,4 +1,4 @@
-# -> Change Comment Pages Dynamically
+# -> Get Categories Links Dynamically
 
 import requests
 
@@ -34,33 +34,41 @@ class storeCategoryCrawl:
 
         return productsUrls
 
+    def getComments(self, productId, commentsPagesCount):
+        for i in range(commentsPagesCount):
+            request = requests.get(
+                "https://api.digikala.com/v1/product/" + str(productId) + "/comments/?page=" + str(commentsPagesCount))
+
+            if "comments" in request.json()["data"]:
+                for j in request.json()["data"]["comments"]:
+                    print(j["body"])
+
+    def getDetails(self, productId):
+        request = requests.get(
+            "https://api.digikala.com/v1/product/" + str(productId) + "/")
+
+        print(request.json()["data"]["product"]
+              ["review"]["description"])
+
     def extractProductDetails(self):
         self.extractProducts()
 
         if (len(self.productsUrls) > 0 and self.status == 200):
+
             for i in self.productsUrls:
                 print(str(i["id"]))
 
                 # -> Product Details
 
-                request = requests.get(
-                    "https://api.digikala.com/v1/product/" + str(i["id"]) + "/")
-
-                print(request.json()["data"]["product"]
-                      ["review"]["description"])
+                # self.getDetails(i["id"])
 
                 # -> Comments
 
-                request = requests.get(
-                    "https://api.digikala.com/v1/product/" + str(i["id"]) + "/comments/?page=1")
-
-                if "comments" in request.json()["data"]:
-                    for j in request.json()["data"]["comments"]:
-                        print(j["body"])
+                self.getComments(i["id"], 1)
 
 
-for i in range(10):
+for i in range(1):
     storeCategoryData = storeCategoryCrawl(
         'CATEGORY_LINK' + str(i))
 
-    print(storeCategoryData.checkCategory())
+    print(storeCategoryData.extractProductDetails())
