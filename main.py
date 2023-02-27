@@ -35,6 +35,7 @@ class storeCategoryCrawl:
         return productsUrls
 
     def getComments(self, productId, commentsPagesCount):
+        allComments = []
         for i in range(commentsPagesCount):
             request = requests.get(
                 "https://api.digikala.com/v1/product/" + str(productId) + "/comments/?page=" + str(commentsPagesCount))
@@ -44,18 +45,17 @@ class storeCategoryCrawl:
             else:
                 if "comments" in request.json()["data"]:
                     for j in request.json()["data"]["comments"]:
-                        print(
-                            'C----------------------------------------')
-                        print(j["body"])
+                        allComments.append(j["body"])
+
+        return allComments
 
     def getDetails(self, productId):
         request = requests.get(
             "https://api.digikala.com/v1/product/" + str(productId) + "/")
 
-        print(
-            'D----------------------------------------')
-        print(request.json()["data"]["product"]
-              ["review"]["description"])
+        allDetails = request.json()["data"]["product"]["review"]["description"]
+
+        return allDetails
 
     def extractProductDetails(self):
         self.extractProducts()
@@ -69,11 +69,15 @@ class storeCategoryCrawl:
 
                 # -> Product Details
 
-                self.getDetails(i["id"])
+                print(
+                    'D----------------------------------------')
+                print(self.getDetails(i["id"]))
 
                 # -> Comments
 
-                self.getComments(i["id"], 1)
+                print(
+                    'C----------------------------------------')
+                print(self.getComments(i["id"], 1))
 
 
 for i in range(1):
