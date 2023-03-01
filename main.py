@@ -1,6 +1,7 @@
 # -> Get Categories Links Dynamically
 
 import requests
+from time import sleep
 
 
 class storeCategoryCrawl:
@@ -37,6 +38,7 @@ class storeCategoryCrawl:
     def getComments(self, productId, commentsPagesCount):
         allComments = []
         for i in range(commentsPagesCount):
+            sleep(5)
             request = requests.get(
                 "https://api.digikala.com/v1/product/" + str(productId) + "/comments/?page=" + str(commentsPagesCount))
 
@@ -47,15 +49,42 @@ class storeCategoryCrawl:
                     for j in request.json()["data"]["comments"]:
                         allComments.append(j["body"])
 
-        return allComments
+        print('Comments....................')
+        print(allComments)
 
     def getDetails(self, productId):
+        sleep(5)
         request = requests.get(
             "https://api.digikala.com/v1/product/" + str(productId) + "/")
 
-        allDetails = request.json()["data"]["product"]["review"]["description"]
+        print('Title....................')
+        productTitle = request.json(
+        )["data"]["product"]["title_fa"]
+        print(productTitle)
 
-        return allDetails
+        print('Description....................')
+        productDescription = request.json(
+        )["data"]["product"]["review"]["description"]
+        print(productDescription)
+
+        print('Properties....................')
+        productProperties = request.json()[
+            "data"]["product"]["properties"]
+        print(productProperties)
+
+        print('Colors....................')
+        productColors = []
+        for i in request.json()["data"]["product"]["colors"]:
+            productColors.append(
+                {"title": i["title"], "hexCode": i["hex_code"]})
+        print(productColors)
+
+        print('Specifications....................')
+        productSpecifications = []
+        for i in request.json()["data"]["product"]["specifications"][0]["attributes"]:
+            for j in i["values"]:
+                productSpecifications.append({"title": i["title"], "value": j})
+        print(productSpecifications)
 
     def extractProductDetails(self):
         self.extractProducts()
@@ -64,23 +93,20 @@ class storeCategoryCrawl:
 
             for i in self.productsUrls:
                 print(
-                    'P----------------------------------------')
-                print(str(i["id"]) + " - " + str(i["title"]))
+                    'Product ID----------------------------------------')
+                print(str(i["id"]))
 
                 # -> Product Details
 
-                print(
-                    'D----------------------------------------')
-                print(self.getDetails(i["id"]))
+                self.getDetails(i["id"])
 
                 # -> Comments
 
-                print(
-                    'C----------------------------------------')
-                print(self.getComments(i["id"], 1))
+                self.getComments(i["id"], 1)
 
 
 for i in range(1):
+    sleep(5)
     storeCategoryData = storeCategoryCrawl(
         'CATEGORY_LINK' + str(i))
 
