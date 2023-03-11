@@ -1,6 +1,13 @@
+# Dynamic Time Sleep
+
 import requests
 from time import sleep
 import json
+
+
+commentsPagesCounts = 1
+categoriesStartPage = 1
+categoriesEndPage = 10
 
 
 class storeCategoryCrawl:
@@ -67,7 +74,8 @@ class storeCategoryCrawl:
                 productDetails = self.getDetails(i["id"])
 
                 # -> Comments
-                productComments = self.getComments(i["id"], 1)
+                productComments = self.getComments(
+                    i["id"], commentsPagesCounts)
 
                 productDetails["comments"] = productComments
 
@@ -81,7 +89,7 @@ class storeCategoryCrawl:
 allCategoriesLinks = ["CATEGORY_LINK"]
 
 for i in allCategoriesLinks:
-    for j in range(1, 10):
+    for j in range(categoriesStartPage, categoriesEndPage):
         storeCategoryData = storeCategoryCrawl(
             i + str(j))
 
