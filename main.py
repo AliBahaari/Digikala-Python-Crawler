@@ -1,7 +1,8 @@
-# -> Get Categories Links Dynamically
+# Fix Redundant Fetching
 
 import requests
 from time import sleep
+import json
 
 
 class storeCategoryCrawl:
@@ -14,8 +15,7 @@ class storeCategoryCrawl:
 
         if (request.json()["status"] != 200):
             self.status = 400
-
-            return "Category Error"
+            print("Category Error: " + request.json()["status"])
         else:
             self.data = request.json()["data"]
             self.status = 200
@@ -38,53 +38,24 @@ class storeCategoryCrawl:
     def getComments(self, productId, commentsPagesCount):
         allComments = []
         for i in range(commentsPagesCount):
-            sleep(5)
             request = requests.get(
                 "https://api.digikala.com/v1/product/" + str(productId) + "/comments/?page=" + str(commentsPagesCount))
 
             if (request.json()["status"] != 200):
-                return "Comments Error"
+                print("Comments: " + request.json()["status"])
             else:
-                if "comments" in request.json()["data"]:
-                    for j in request.json()["data"]["comments"]:
-                        allComments.append(j["body"])
+                allComments.append(request.json()["data"])
 
-        print('Comments....................')
-        print(allComments)
+        return allComments
 
     def getDetails(self, productId):
-        sleep(5)
         request = requests.get(
             "https://api.digikala.com/v1/product/" + str(productId) + "/")
 
-        print('Title....................')
-        productTitle = request.json(
-        )["data"]["product"]["title_fa"]
-        print(productTitle)
-
-        print('Description....................')
-        productDescription = request.json(
-        )["data"]["product"]["review"]["description"]
-        print(productDescription)
-
-        print('Properties....................')
-        productProperties = request.json()[
-            "data"]["product"]["properties"]
-        print(productProperties)
-
-        print('Colors....................')
-        productColors = []
-        for i in request.json()["data"]["product"]["colors"]:
-            productColors.append(
-                {"title": i["title"], "hexCode": i["hex_code"]})
-        print(productColors)
-
-        print('Specifications....................')
-        productSpecifications = []
-        for i in request.json()["data"]["product"]["specifications"][0]["attributes"]:
-            for j in i["values"]:
-                productSpecifications.append({"title": i["title"], "value": j})
-        print(productSpecifications)
+        if (request.json()["status"] != 200):
+            print("Product: " + request.json()["status"])
+        else:
+            return request.json()["data"]
 
     def extractProductDetails(self):
         self.extractProducts()
@@ -92,22 +63,28 @@ class storeCategoryCrawl:
         if (len(self.productsUrls) > 0 and self.status == 200):
 
             for i in self.productsUrls:
-                print(
-                    'Product ID----------------------------------------')
-                print(str(i["id"]))
+                sleep(3)
 
                 # -> Product Details
-
-                self.getDetails(i["id"])
+                productDetails = self.getDetails(i["id"])
 
                 # -> Comments
+                productComments = self.getComments(i["id"], 1)
 
-                self.getComments(i["id"], 1)
+                productDetails["comments"] = productComments
+
+                with open(str(i["id"]) + ".json", "w", encoding='utf-8') as productFile:
+                    json.dump(productDetails, productFile,
+                              ensure_ascii=False, indent=4)
+
+                print(str(i["id"]) + " - Completed")
 
 
-for i in range(1):
-    sleep(5)
-    storeCategoryData = storeCategoryCrawl(
-        'CATEGORY_LINK' + str(i))
+allCategoriesLinks = ["CATEGORY_LINK"]
 
-    storeCategoryData.extractProductDetails()
+for i in allCategoriesLinks:
+    for j in range(10):
+        storeCategoryData = storeCategoryCrawl(
+            i + str(j))
+
+        storeCategoryData.extractProductDetails()
