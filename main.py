@@ -1,5 +1,3 @@
-# Fix Redundant Fetching
-
 import requests
 from time import sleep
 import json
@@ -63,7 +61,7 @@ class storeCategoryCrawl:
         if (len(self.productsUrls) > 0 and self.status == 200):
 
             for i in self.productsUrls:
-                sleep(3)
+                sleep(1)
 
                 # -> Product Details
                 productDetails = self.getDetails(i["id"])
@@ -83,7 +81,7 @@ class storeCategoryCrawl:
 allCategoriesLinks = ["CATEGORY_LINK"]
 
 for i in allCategoriesLinks:
-    for j in range(10):
+    for j in range(1, 10):
         storeCategoryData = storeCategoryCrawl(
             i + str(j))
 
